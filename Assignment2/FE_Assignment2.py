@@ -9,19 +9,22 @@ def Calculate_C (p, rate, time):
     if rate == 0:
         print("Interest rate cannot be zero.")
         return
-    print(f"For Given principal {p} and interest rate {rate} with time {time}, Future Value: {p * (rate * (1 + rate)**time) / ((1 + rate)**time - 1)}")
+    print(f"For Given principal {p} and interest rate {rate} with time {time},  then EMI: {p * (rate * (1 + rate)**time) / ((1 + rate)**time - 1)}")
 
 def CalculatePrincipal(c, rate, time):
     if (1 + rate)**time - 1 == 0 or rate == 0:
         print("Interest rate cannot be zero.")
         return
-    print(f"For Given future value {c} and interest rate {rate} with time {time}, Present Value: {c * ((1 + rate)**time - 1) / (rate * (1 + rate)**time)}")
+    print(f"For Given EMI {c} and interest rate {rate} with time {time}, then Present Value: {c * ((1 + rate)**time - 1) / (rate * (1 + rate)**time)}")
 
 def CalculateTime(p, c, rate):
-    if (c - p * rate) == 0 or rate == 0:
+    if rate == 0:
         print("Interest rate cannot be zero.")
         return
-    print(f"For Given principal {p} and future value {c} with interest rate {rate}, Time: {math.log(c / (c - p * rate)) / math.log(1 + rate)}")
+    if c <= p * rate:
+        print("Error: Monthly payment (C) must be greater than Principal * Rate (P * rate).")
+        return
+    print(f"For Given principal {p} and EMI {c} with interest rate {rate}, then Time (in months): {math.log(c / (c - p * rate)) / math.log(1 + rate)}")
 
 def CalculateInterest(p, c, time, maxIter=100, tol=1e-7):
     if c * time <= p:
@@ -46,7 +49,7 @@ def CalculateInterest(p, c, time, maxIter=100, tol=1e-7):
             initial_new = initial / 2
 
         if abs(initial_new - initial) < tol:
-            print(f"For Given principal {p}, future value {c}, and time {time}, Interest Rate: {initial_new:.6f} ({initial_new * 100:.2f}%)")
+            print(f"For Given principal {p}, EMI {c}, and time {time}, then Interest Rate: {initial_new:.6f} ({initial_new * 100:.2f}%)")
             return initial_new
 
         initial = initial_new
@@ -70,42 +73,42 @@ def valid_input(input_value):
 
 if __name__ == "__main__":
     while True:
+        print("="*50)
         print("""
-==================================================================================
 Choose what to calulate. Enter the corresponding integer 
-    1. Calculate Future Value given present value, interest rate, and time.
-    2. Calculate Present Value given future value, interest rate, and time 
-    3. Calulate Interest Rate given present value, future value and time.
-    4. Calculate Time for Maturity given present value, future value and interest rate. 
+    1. Calculate EMI given present value, interest rate, and time.
+    2. Calculate Present Value given EMI, interest rate, and time 
+    3. Calulate monthly Interest Rate given present value, EMI and time.
+    4. Calculate Time (in months) given present value, EMI and interest rate. 
     0. Exit
 Enter the value :-
               """)
 
         compute = input ()
         if compute == '0':
-            continue
+            break
         elif compute not in ('1', '2', '3', '4'):
             print("Invalid Input")
-            break
+            continue
 
 
         if compute == '1':
             principal = valid_input("Enter the Principal Amount: ")
-            interest = valid_input("Enter the Interest Rate: between 0 and 1: ")
-            time = valid_input("Enter the Time: ")
+            interest = valid_input("Enter the monthly Interest Rate: between 0 and 1: ")
+            time = valid_input("Enter the Time (in months): ")
             Calculate_C(p=principal, rate=interest, time=time)
         elif compute == '2':
-            future_value = valid_input("Enter the Future Value: ")
-            interest = valid_input("Enter the Interest Rate: between 0 and 1: ")
-            time = valid_input("Enter the Time: ")
-            CalculatePrincipal(c=future_value, rate=interest, time=time)
+            emi_value = valid_input("Enter the EMI: ")
+            interest = valid_input("Enter the monthly Interest Rate: between 0 and 1: ")
+            time = valid_input("Enter the Time (in months): ")
+            CalculatePrincipal(c=emi_value, rate=interest, time=time)
         elif compute == '3':
             principal = valid_input("Enter the Principal Amount: ")
-            future_value = valid_input("Enter the Future Value: ")
-            time = valid_input("Enter the Time: ")
-            CalculateInterest(p=principal, c=future_value, time=time)
+            emi_value = valid_input("Enter the EMI: ")
+            time = valid_input("Enter the Time (in months): ")
+            CalculateInterest(p=principal, c=emi_value, time=time)
         elif compute == '4':
             principal = valid_input("Enter the Principal Amount: ")
-            future_value = valid_input("Enter the Future Value: ")
-            interest = valid_input("Enter the Interest Rate: between 0 and 1: ")
-            CalculateTime(p=principal, c=future_value, rate=interest)
+            emi_value = valid_input("Enter the EMI: ")
+            interest = valid_input("Enter the monthly Interest Rate: between 0 and 1: ")
+            CalculateTime(p=principal, c=emi_value, rate=interest)
