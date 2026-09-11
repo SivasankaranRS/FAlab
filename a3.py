@@ -92,14 +92,23 @@ def coupon_bond_price(f, coupon_pay, r, t, m=1):
     }
 
 # need some clarifications
-def ytm_cashflow(f, r, coupon_pay, p):
+def ytm_cashflow(f, r, coupon_pay, p, t):
     """
     f: Face value
     r: Annual interest rate
     coupon_pay: Coupon payment per period
     p: Price of the bond
     """
-    return 1
+    ytm = (coupon_pay + (f - p)/t) / ((f + p) / 2)
+    return ytm
+
+def duration_bond(market_rate, coupon_rate, fv, t):
+    c = coupon_rate * fv
+    for i in range(t):
+        dur += c * i / (1 + market_rate)**i
+        durcc += c * i * math.exp(-market_rate * i)
+
+    return {"compunding":(dur + (c + fv) * t / (1+ market_rate)**t)/fv , "continuous": (durcc + (c + fv)*t*math.exp(-market_rate*t))/fv}
 
 def construct_yield_curve(maturities: list[float], rates: list[float]):
     plt.figure(figsize=(8, 4.5))
@@ -109,3 +118,26 @@ def construct_yield_curve(maturities: list[float], rates: list[float]):
     plt.ylabel("Yield to Maturity (%)")
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.show()
+
+
+if name = '__main__':
+    while True:
+        print("Choose the any corresponding number to the question")
+        print("""
+    1. Write a program to calculate of PV of ‘n’ cash flows with fixed interest rate ‘r’
+    2. Write a program to compute the interest from PV of the series of cash flows C1,C2..Cn
+    3. Write a program to compute the Zero coupon Price of a Bond with respect to different
+    interest rate(simple, compounding and continuous compounding)
+    4. Write a program to compute the price of a coupon bond with different interest rate
+    methodology with most suitable inputs
+    5. Write a programme to compute the YTM based on cash flows technique and approximation
+    method with necessary inputs
+    6. Compute the duration of a coupon bond with necessary inputs to the program.
+    7. Construct an yield curve for bonds with different maturities and interest rates.
+    8. Exit
+        """)
+        choice = scanf("Enter the choice")
+        if choice != [1,2,3,4,5,6,7,8]:
+            print("Invalid Choice")
+            break
+        if choice == 1:
