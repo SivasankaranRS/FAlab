@@ -270,12 +270,8 @@ if __name__ == "__main__":
 
         elif choice == 7:
             while True:
-                m_input = input(
-                    "Enter maturities in years separated by space (e.g., 1 2 5 10 30): "
-                ).strip()
-                r_input = input(
-                    "Enter corresponding yields separated by space (e.g., 0.02 0.025 0.03 0.035 0.04): "
-                ).strip()
+                m_input = input("Enter maturities in years separated by space (e.g., 1 2 5 10 30): ").strip()
+                r_input = input("Enter corresponding yields separated by space (e.g., 0.02 0.025 0.03 0.035 0.04): ").strip()
 
                 # Checking for empty inputs
                 if not m_input or not r_input:
