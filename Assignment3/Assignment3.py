@@ -100,21 +100,44 @@ def ytm_cashflow(f, r, coupon_pay, p, t):
     ytm = (coupon_pay + (f - p) / t) / ((f + p) / 2)
     return ytm
 
+def compute_ytm(f, coupon_rate, p, t, m=1):
+    c = (f * coupon_rate) / m
+    n = int(t * m)
+    annual_coupon = f * coupon_rate
+    r = ytm_cashflow(f, coupon_rate, annual_coupon, p, t)
+    ytm_approx = r
+
+    # Newton-Raphson method to find the exact YTM
+    for _ in range(100):
+        pv = sum(c / ((1 + r / m) ** k) for k in range(1, n + 1)) + (f / ((1 + r / m) ** n))
+        diff = pv - p
+        if abs(diff) < 1e-6:
+            break
+        dpv_dr = sum(-(k / m) * c / ((1 + r / m) ** (k + 1)) for k in range(1, n + 1)) - (n / m) * f / ((1 + r / m) ** (n + 1))
+        r = r - (diff / dpv_dr)
+    return {
+        "Approximation Method": f"{ytm_approx * 100:.2f}%",
+        "Convergence Exact Method": f"{r * 100:.2f}%"
+    }
+
 def duration_bond(market_rate, coupon_rate, fv, t):
     c = coupon_rate * fv
     dur = 0
     durcc = 0
+    prices = coupon_bond_price(fv, coupon_rate, market_rate, t, 1)
     for i in range(0, int(t)):
         dur += c * i / (1 + market_rate)**i
         durcc += c * i * math.exp(-market_rate * i)
 
-    return {"compounding":(dur + (c + fv) * t / (1+ market_rate)**t)/fv ,
-             "continuous": (durcc + (c + fv)*t*math.exp(-market_rate*t))/fv}
+    return {"compounding":(dur + (c + fv) * t / (1+ market_rate)**t)/prices["Discrete Compounding"],
+             "continuous": (durcc + (c + fv)*t*math.exp(-market_rate*t))/prices["Continuous Compounding"]}
 
 def construct_yield_curve(maturities: list[float], rates: list[float]):
     """
     Plots the Yield Curve given maturities and rates
     """
+    sorted_pairs = sorted(zip(maturities, rates))
+    maturities, rates = zip(*sorted_pairs)
     plt.figure(figsize=(8, 4.5))
     plt.plot(
         maturities,
@@ -189,11 +212,12 @@ if __name__ == "__main__":
     8. Exit
         """)
 
-        try:
-            choice = int(input("\nEnter choice (1-8): "))
-        except ValueError:
-            print("Invalid input. Please enter an integer from 1 to 8.")
-            continue
+        choice = int(input("\nEnter choice (1-8): "))
+        if choice == 8:
+            break
+        elif choice not in (1, 2, 3, 4, 5, 6, 7):
+            print("Invalid Input")
+            break
 
         if choice == 1:
             cfs = get_valid_cashflows()
@@ -211,7 +235,7 @@ if __name__ == "__main__":
             f = get_valid_input("face_value", "Enter face value: ")
             r = get_valid_input("interest_rate", "Enter interest rate (as a decimal between 0 to 1): ")
             t = get_valid_input("time", "Enter time to maturity (in years): ")
-            m = get_valid_input("compounding_frequency", "Enter compounding frequency (per year) default = 1: ")
+            m = get_valid_input("compounding_frequency", "Enter compounding frequency (per year): ")
             res = zero_coupon_price(f, r, t, m)
             for k, v in res.items():
                 print(f"{k}: {v}")
@@ -221,7 +245,7 @@ if __name__ == "__main__":
             cr = get_valid_input("interest_rate", "Enter annual coupon rate (as a decimal between 0 to 1): ")
             r = get_valid_input("interest_rate", "Enter interest rate (as a decimal between 0 to 1): ")
             t = get_valid_input("time", "Enter time to maturity (in years): ")
-            m = get_valid_input("compounding_frequency", "Enter compounding frequency (per year) default = 1: ")
+            m = get_valid_input("compounding_frequency", "Enter compounding frequency (per year): ")
             res = coupon_bond_price(f, cr, r, t, m)
             for k, v in res.items():
                 print(f"{k}: {v}")
@@ -231,13 +255,14 @@ if __name__ == "__main__":
             cr = get_valid_input("interest_rate", "Enter annual coupon rate (as a decimal between 0 to 1): ")
             p = get_valid_input("face_value", "Enter current market price: ")
             t = get_valid_input("time", "Enter time to maturity (in years): ")
-            res = ytm_cashflow(f, cr, cr*f, p, t)
-            print(f"Yield to Maturity (YTM): {res:.4f} or {res*100:.2f}%")
+            res = compute_ytm(f, cr, p, t)
+            for k, v in res.items():
+                print(f"{k}: {v}")
 
         elif choice == 6:
             r = get_valid_input("interest_rate", "Enter market discount rate (as a decimal between 0 to 1): ")
             cr = get_valid_input("interest_rate", "Enter annual coupon rate (as a decimal between 0 to 1): ")
-            fv = get_valid_input("face_value", "Enter Bond Price: ")
+            fv = get_valid_input("face_value", "Enter Face Value: ")
             t = get_valid_input("time", "Enter time to maturity (in years): ")
             res = duration_bond(r, cr, fv, t)
             for k, v in res.items():
