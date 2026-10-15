@@ -28,7 +28,10 @@ def loan_schedule(principal, annual_rate, years):
     total_months = years * 12
     
     # Calculate EMI
-    emi = principal * (monthly_rate * (1 + monthly_rate) ** total_months) / (((1 + monthly_rate) ** total_months) - 1)
+    if monthly_rate == 0:
+        emi = principal / total_months
+    else:
+        emi = principal * (monthly_rate * (1 + monthly_rate) ** total_months) / (((1 + monthly_rate) ** total_months) - 1)
     
     balance = principal
     schedule_data = []
@@ -56,7 +59,7 @@ def loan_schedule(principal, annual_rate, years):
 if __name__ == "__main__":
     p = get_valid_input("principal", "Enter Principal Amount (Positive Values Only): ")
     r = get_valid_input("annual_rate", "Enter Annual Interest Rate as decimal (between 0 to 1): ")
-    y = get_valid_input("years", "Enter Loan Duration in Years): ")
+    y = get_valid_input("years", "Enter Loan Duration in Years: ")
     
     df_schedule, emi, total_months = loan_schedule(principal=p, annual_rate=r, years=y)
     
@@ -65,5 +68,5 @@ if __name__ == "__main__":
     print(df_schedule.to_string(index=False))
     
     print("-" * 60)
-    print(f"Total Amount Paid: {emi * total_months}")
-    print(f"Total Interest Paid: {(emi * total_months) - p}")
+    print(f"Total Amount Paid: {emi * total_months:,.2f}")
+    print(f"Total Interest Paid: {(emi * total_months) - p:,.2f}")
