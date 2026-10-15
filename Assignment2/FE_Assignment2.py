@@ -7,28 +7,36 @@ def Calculate_C (p, rate, time):
     rate = monthly interest rate
     """
     if rate == 0:
-        print("Interest rate cannot be zero.")
-        return
-    print(f"For Given principal {p} and interest rate {rate} with time {time},  then EMI: {p * (rate * (1 + rate)**time) / ((1 + rate)**time - 1)}")
+        emi = p / time
+    else:
+        emi = p * (rate * (1 + rate) ** time) / ((1 + rate) ** time - 1)
+    print(f"\nFor Principal = {p:.2f}, Monthly Rate = {rate * 100:.2f}%, Time = {time} months:")
 
 def CalculatePrincipal(c, rate, time):
-    if (1 + rate)**time - 1 == 0 or rate == 0:
-        print("Interest rate cannot be zero.")
-        return
-    print(f"For Given EMI {c} and interest rate {rate} with time {time}, then Present Value: {c * ((1 + rate)**time - 1) / (rate * (1 + rate)**time)}")
+    if rate == 0:
+        p = c * time
+    else:
+        p = c * ((1 + rate)**time - 1) / (rate * (1 + rate)**time)
+    print(f"For Given EMI {c} and interest rate {rate} with time {time}, then Present Value: {p:.2f}")
 
 def CalculateTime(p, c, rate):
-    if rate == 0:
-        print("Interest rate cannot be zero.")
-        return
     if c <= p * rate:
         print("Error: Monthly payment (C) must be greater than Principal * Rate (P * rate).")
         return
-    print(f"For Given principal {p} and EMI {c} with interest rate {rate}, then Time (in months): {math.log(c / (c - p * rate)) / math.log(1 + rate)}")
+    
+    if rate == 0:
+        time = p / c
+    else:
+        time = math.log(c / (c - p * rate)) / math.log(1 + rate)
+
+    print(f"For Given principal {p} and EMI {c} with interest rate {rate}, then Time (in months): {time}")
 
 def CalculateInterest(p, c, time, maxIter=100, tol=1e-7):
-    if c * time <= p:
+    if c * time < p:
         print("Error: Total payments (C * time) must be greater than Principal (P).")
+        return
+    if c * time == p:
+        print(f"\nFor Principal = {p:.2f}, EMI = {c:.2f}, Time = {time} months: Interest Rate = 0.00%")
         return
 
     initial = (c * time - p) / (p * time)
@@ -63,7 +71,7 @@ def valid_input(input_value):
             if value < 0:
                 print("Please enter a positive number.")
                 continue
-            if input_value == "Enter the Interest Rate: between 0 and 1: " and (value < 0 or value > 1):
+            if input_value == "Enter the monthly Interest Rate: between 0 and 1: " and (value < 0 or value > 1):
                 print("Please enter a value between 0 and 1.")
                 continue
             return value
